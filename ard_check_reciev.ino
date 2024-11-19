@@ -8,7 +8,7 @@ const int maxPacketSize = 30;
 
 char receivedData[maxPacketSize + 1];
 unsigned long lastReceiveTime = 0;
-const unsigned long receiveTimeout = 1000; // 1 second
+const unsigned long receiveTimeout = 1000;
 
 void setup() {
   Serial.begin(9600);
@@ -28,18 +28,16 @@ void setup() {
 void loop() {
   if (radio.available()) {
     radio.read(&receivedData, maxPacketSize);
-    receivedData[maxPacketSize] = '\0'; // Null-terminate the string
+    receivedData[maxPacketSize] = '\0';
     Serial.print("Received: ");
     Serial.println(receivedData);
     lastReceiveTime = millis();
   }
   
-  // Check if too much time has passed since the last reception
   if (millis() - lastReceiveTime > receiveTimeout) {
     Serial.println("No data from beacon...");
     lastReceiveTime = millis();
   }
   
-  // Minimum delay for stable operation
   delay(1);
 }
