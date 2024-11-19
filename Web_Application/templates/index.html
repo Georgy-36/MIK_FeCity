@@ -24,7 +24,7 @@
         }
 
         input[type="text"], select {
-            width: calc(100% - 160px); /* Make it flexible */
+            width: calc(100% - 160px); 
             padding: 5px;
             margin-left: 10px;
             border: 2px solid #ccc;
@@ -134,18 +134,15 @@
     <script>
     let connectionCheckInterval;
 
-    // Logging function to append log entries
     function log(message) {
         $('#log').append(`<p>${new Date().toLocaleString()} - ${message}</p>`);
         $('#log').scrollTop($('#log')[0].scrollHeight);
     }
 
-    // Save connection status locally
     function saveConnectionStatus(status) {
         localStorage.setItem('isConnected', status);
     }
 
-    // Restore connection status on page reload, but reset if no active connection
     function restoreConnectionStatus() {
         const isConnected = localStorage.getItem('isConnected');
         if (isConnected === 'true') {
@@ -159,11 +156,10 @@
                 }
             });
         } else {
-            resetConnectionState();  // Set disconnected as the default state
+            resetConnectionState();
         }
     }
 
-    // Reset the connection state to default (disconnected)
     function resetConnectionState() {
         $('#connect').prop('disabled', false);
         $('#disconnect, #read, #write').prop('disabled', true);
@@ -171,31 +167,28 @@
         saveConnectionStatus('false');
     }
 
-    // Function to start periodic connection check
     function startConnectionCheck() {
         connectionCheckInterval = setInterval(function() {
             $.post('/check_connection', function(response) {
                 if (response.status === 'error') {
                     log("ESP disconnected.");
-                    resetConnectionState();  // Reset the UI to reflect the disconnected state
-                    clearInterval(connectionCheckInterval);  // Stop the interval if disconnected
+                    resetConnectionState();  
+                    clearInterval(connectionCheckInterval); 
                 }
             }).fail(function() {
                 log("Failed to check connection. Assuming disconnected.");
                 resetConnectionState();
-                clearInterval(connectionCheckInterval); // Stop checking if the request fails
+                clearInterval(connectionCheckInterval); 
             });
-        }, 2000); // Every 2 seconds
+        }, 2000); 
     }
 
-    // Function to stop periodic connection check
     function stopConnectionCheck() {
         if (connectionCheckInterval) {
             clearInterval(connectionCheckInterval);
         }
     }
 
-    // Form validation
     function validateForm() {
         const cargoId = $('#cargo_id').val();
         const longitude = $('#longitude').val();
@@ -208,24 +201,20 @@
 
         const errors = [];
 
-        // Validate Cargo ID (only digits)
         if (!/^\d+$/.test(cargoId)) {
             errors.push("Cargo ID should only contain digits.");
         }
 
-        // Validate Longitude (-180 to 180)
         const longitudeVal = parseFloat(longitude);
         if (isNaN(longitudeVal) || longitudeVal < -180 || longitudeVal > 180) {
             errors.push("Longitude should be a number between -180 and 180.");
         }
 
-        // Validate Latitude (-90 to 90)
         const latitudeVal = parseFloat(latitude);
         if (isNaN(latitudeVal) || latitudeVal < -90 || latitudeVal > 90) {
             errors.push("Latitude should be a number between -90 and 90.");
         }
 
-        // Validate text fields (max 128 characters)
         if (address.length > 128) {
             errors.push("Address should not exceed 128 characters.");
         }
@@ -251,7 +240,7 @@
                     $('#disconnect, #read, #write').prop('disabled', false);
                     $('#status').text('Connected');
                     saveConnectionStatus('true');
-                    startConnectionCheck(); // Start checking connection after connecting
+                    startConnectionCheck(); 
                 } else {
                     $('#status').text('Disconnected');
                 }
@@ -272,7 +261,6 @@
         $('#read').click(function() {
             $.post('/read', { device: $('#device').val() }, function(response) {
                 log("Received Data:");
-                // Display received data in the form fields
                 $('#cargo_id').val(response.data.CargoID);
                 $('#longitude').val(response.data.Longitude);
                 $('#latitude').val(response.data.Latitude);
@@ -282,7 +270,6 @@
                 $('#weight').val(response.data.Weight);
                 $('#description').val(response.data.Description);
 
-                // Log the received data
                 const receivedData = `Cargo ID: ${response.data.CargoID}<br>Longitude: ${response.data.Longitude}<br>Latitude: ${response.data.Latitude}<br>Address: ${response.data.Address}<br>Full Name: ${response.data.FullName}<br>Price: ${response.data.Price}<br>Weight: ${response.data.Weight}<br>Description: ${response.data.Description}`;
                 log(receivedData);
             });
@@ -291,8 +278,8 @@
         $('#write').click(function() {
             const errors = validateForm();
             if (errors.length > 0) {
-                $('#errors').html(errors.join('<br>')); // Show errors
-                return; // Prevent sending if there are validation errors
+                $('#errors').html(errors.join('<br>'));
+                return; 
             }
 
             var data = {
@@ -309,7 +296,6 @@
 
             $.post('/write', data, function(response) {
                 log("Sent Data:");
-                // Log the sent data
                 const sentData = `Cargo ID: ${data.cargo_id}<br>Longitude: ${data.longitude}<br>Latitude: ${data.latitude}<br>Address: ${data.address}<br>Full Name: ${data.full_name}<br>Price: ${data.price}<br>Weight: ${data.weight}<br>Description: ${data.description}`;
                 log(sentData);
                 log(response.message);
